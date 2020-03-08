@@ -1,0 +1,56 @@
+* {
+	margin: 0px;
+	padding: 0px;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: 'Assistant', ;
+	background: white; /* #F7A95A; #F05742*/
+}
+button {
+	font-family: 'Assistant', ;
+}
+
+ html, body {
+        height: 100%;
+        padding: 0; 
+      }
+
+header {
+	display: flex;
+	width:90%;
+	height: 5vh;
+	margin: auto;
+	align-items: center;
+}
+
+.logo-container {
+	font-family: 'Assistant', ;
+	font-size: 70px;
+	color: #F7A95A;
+	margin-left: 5%;
+	background: transparent ; 
+	flex: 2;
+	justify-content: center;
+	position: relative;
+	top: 10px;
+	bottom: 30px;
+	
+}
+.logo {
+	font-family: 'Assistant', ;
+	font-weight: 400;
+	font-size: 800;
+	
+}
+
+#map {
+	height: 95%;
+	width: 100%;
+	/*margin-left: 5%;
+	margin-top: 50px;
+	*/
+	position: center;
+	
+  }

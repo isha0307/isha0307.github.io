@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Setup  -->
+    <title>Foodie</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <link href="https://fonts.googleapis.com/css?family=Assistant&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>  
+  </head>
+  <body>
+    
+    <!-- Creating logo for header-->
+    <div class="logo-container">
+        <table>
+          <tr>
+            <TD>
+        <img src="logo.png" alt = "logo"style="width:200px;height:200px;"></TD>
+      <TD>        <h4 class = "logo"> Find the right restaurant for you!</h4></TD>
+      </tr>
+      </table>
+    </div> 
+    <div id="map"></div>
+    <script>
+    var map, infoWindow;
+    // Try HTML5 geolocation.
+    var pos; //current position
+    var yelpData; // restaurants nearby
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+        pos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+        };
+        infoWindow.setPosition(pos);
+        infoWindow.setContent('Your Location'); //Finds location on the map
+        infoWindow.open(map);   
+        map.setCenter(pos); //Sets the center to your position
+        getYelpData();
+                
+        }, 
+        function() {
+        handleLocationError(true, infoWindow, map.getCenter());
+        });
+    } 
+    else {
+        // Browser doesn't support Geolocation
+        handleLocationError(false, infoWindow, map.getCenter());
+    }
+
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            //center: {lat: -34.397, lng: 150.644},
+            zoom: 12.5        
+        });    
+        infoWindow = new google.maps.InfoWindow;
+        }
+
+    function handleLocationError(browserHasGeolocation, infoWindow, pos) { 
+        infoWindow.setPosition(pos);
+        infoWindow.setContent(browserHasGeolocation ?
+                                'Error: The Geolocation service failed.' :
+                                'Error: Your browser doesn\'t support geolocation.');
+        infoWindow.open(map);
+        }
+
+    function getYelpData(){ //Calls Yelp Fusion API
+        var proxyUrl = "https://cors-anywhere.herokuapp.com/";
+        
+        var yUrl = "https://api.yelp.com/v3/businesses/search?latitude=".concat(pos.lat.toString(), "&longitude=", pos.lng.toString(), "&category=Food");
+        var settings = {
+            "async": true,
+            "crossDomain": true,
+            "url":  proxyUrl + yUrl,
+            "method": "GET",
+            'success': function (data) {
+            yelpData = data;
+            var businesses = yelpData.businesses;
+            // Data table 
+            
+            mapMarkers();
+            },
+            headers: { 'Authorization': 'Bearer NlIpTHuH_qjnjsGK2FSYzlC2Wyft5vS_t6Wp04r3WZDe-WU3nuipRurWzYWOE9FRSArM7kX5N2gdyfAb6pDlz6mDV7DgxRAwRb4AkBSmN3uA2TKt-2CQlduWa9lbXnYx' }
+        }
+        $.ajax(settings); //uses JQuery framework to call Yelp API
+        }
+
+    
+    var markers=[]; //Array of markers to display restaurants near me
+    // Creates the map markers of the business near me
+    function mapMarkers(){
+        var businesses = yelpData.businesses; //Sets the data to Array
+        var infowindow = new google.maps.InfoWindow();
+        for(var i = 0; i < businesses.length; i++){ //Loops through all businesses
+          var myLatlng = new google.maps.LatLng(businesses[i].coordinates.latitude, businesses[i].coordinates.longitude);//Gets coordinates of each business
+          var marker = new google.maps.Marker({ //Creates markers for each business
+              position: myLatlng,
+              title: businesses[i].name,
+              icon : "foodmarker.png"
+          });
+          var cat; //Used for each category of the business
+          for (var j =0; j < businesses[i].categories.length; j++){
+            if(businesses[i].categories[j].title != undefined){
+              cat += businesses[i].categories[j].title + ","
+            }  
+            } 
+          var price;
+          console.log(businesses[i].price);
+          if (businesses[i].price == undefined){
+            price = "Unknown"
+          }
+
+          // Infowindow for each business
+          var contentString = '<div id="content">'+
+          '<div id="siteNotice">'+
+          '</div>'+
+          '<h1 id="firstHeading" class="firstHeading">'+businesses[i].name+" <i> ("+price+")</i>"
+          + '</h1>'+  '<div id="bodyContent">'+
+          '<p><b>Rating:</b> ' +businesses[i].rating + 
+          '<br><b>Categories:</b> ' + cat + 
+          '<br><b>Address:</b> ' +businesses[i].location.display_address+ 
+          '<br><b>Phone:</b> ' +businesses[i].display_phone + 
+          '<a href='+businesses[i].url+ '<br> '
+          '.</p>'+
+          '</div>'+
+          '</div>';
+
+          marker.content = contentString;
+          markers[i] = marker;
+
+          google.maps.event.addListener(marker, 'click', function() { //when marker is clicked on, show info window
+          infowindow.setContent(this.content);
+          infowindow.open(this.getMap(), this); 
+          
+          });
+          }
+        // To add the markers to the map, call setMap();
+        for (var j=0; j< markers.length; j++){
+            markers[j].setMap(map);      
+          }
+            
+    }
+    </script>
+    <script async defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCOSqE_g0lWXi0kuHfOhfmJ9x3wejEDevc&callback=initMap">
+    </script>       
+  </body>
+</html>
